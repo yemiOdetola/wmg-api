@@ -21,7 +21,7 @@ router
   .route('/:listingId')
   .get(validate(listingValidation.getListing), listingController.getListing)
   .patch(validate(listingValidation.updateListing), listingController.updateListing)
-  .delete(auth('manageUsers'), validate(listingValidation.deleteListing), listingController.deleteUser);
+  .delete(auth('manageUsers'), validate(listingValidation.deleteListing), listingController.deleteListing);
 
 module.exports = router;
 

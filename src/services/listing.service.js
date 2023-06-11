@@ -1,7 +1,6 @@
 const httpStatus = require('http-status');
 const { Listing } = require('../models');
 const ApiError = require('../utils/ApiError');
-const Listing = require('../models/listing.model');
 
 /**
  * Create a Listing

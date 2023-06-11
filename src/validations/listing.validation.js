@@ -26,8 +26,12 @@ const getSpatialListings = {
 
 const getListings = {
   query: Joi.object().keys({
-    name: Joi.string(),
-    role: Joi.string(),
+    title: Joi.string().required(),
+    image: Joi.string().required(),
+    weight: Joi.number().required(),
+    price: Joi.number().required(),
+    location: Joi.any(),
+    category: Joi.string().required().valid('generic', 'paper', 'glass', 'textitle', 'furniture', 'e-waste', 'batteries', 'plastic'),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
@@ -46,9 +50,15 @@ const updateListing = {
   }),
   body: Joi.object()
     .keys({
-      email: Joi.string().email(),
-      password: Joi.string().custom(password),
-      name: Joi.string(),
+      title: Joi.string().required(),
+      description: Joi.string().required(),
+      instruction: Joi.string().required(),
+      image: Joi.string().required(),
+      weight: Joi.number().required(),
+      price: Joi.number().required(),
+      user: Joi.string().custom(objectId),
+      location: Joi.any(),
+      category: Joi.string().required().valid('generic', 'paper', 'glass', 'textitle', 'furniture', 'e-waste', 'batteries', 'plastic'),
     })
     .min(1),
 };
