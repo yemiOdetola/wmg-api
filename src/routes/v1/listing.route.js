@@ -10,7 +10,7 @@ const router = express.Router();
 
 router
   .route('/')
-  .get(validate(listingValidation.getListings), listingController.getListings)
+  .get(listingController.getListings)
   .post(auth('manageListings'), validate(listingValidation.createListing), listingController.createListing)
 
 router

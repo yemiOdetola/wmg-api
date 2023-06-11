@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
 
+// https://avatars.dicebear.com/api/avataaars/1828888885.svg
 /**
  * Create a user
  * @param {Object} userBody
@@ -11,6 +12,7 @@ const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
+  if (!userBody.avatar) userBody.avatar = `https://avatars.dicebear.com/api/avataaars/0000.svg`;
   return User.create(userBody);
 };
 

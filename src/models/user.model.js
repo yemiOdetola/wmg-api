@@ -23,6 +23,10 @@ const userSchema = mongoose.Schema(
         }
       },
     },
+    avatar: {
+      type: String,
+      required: true,
+    },
     password: {
       type: String,
       required: true,
