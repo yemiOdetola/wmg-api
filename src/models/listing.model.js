@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
 
 const categories = ['generic', 'paper', 'glass', 'textitle', 'furniture', 'e-waste', 'batteries', 'plastic'];
+const statusEnum = ['available', 'accepted', 'rejected', 'counter', 'completed'];
 
 const listingSchema = mongoose.Schema(
   {
@@ -50,6 +51,30 @@ const listingSchema = mongoose.Schema(
       enum: categories,
       default: 'generic',
     },
+    status: {
+      type: String,
+      enum: statusEnum,
+      default: 'available'
+    },
+    // recycler: {
+    //   type: mongoose.SchemaTypes.ObjectId,
+    //   ref: 'Recycler'
+    // },
+    counterOffer: {
+      type: Number
+    },
+    negotiationHistory: [{
+      message: {
+        type: String
+      },
+      offer: {
+        type: Number,
+      },
+      timestamp: {
+        type: Date,
+        default: Date.now
+      }
+    }],
     user: {
       type: mongoose.SchemaTypes.ObjectId,
       ref: 'User',

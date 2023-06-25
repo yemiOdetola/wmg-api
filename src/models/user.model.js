@@ -23,6 +23,26 @@ const userSchema = mongoose.Schema(
         }
       },
     },
+    threshold: {
+      type: Number,
+      required: false,
+      trim: true,
+    },
+    company: {
+      type: Number,
+      required: false,
+      trim: true,
+    },
+    category: {
+      type: Number,
+      required: false,
+      trim: true,
+    },
+    preference: [{
+      type: String,
+      required: false,
+      trim: true,
+    }],
     avatar: {
       type: String,
       required: true,
@@ -32,11 +52,11 @@ const userSchema = mongoose.Schema(
       required: true,
       trim: true,
       minlength: 8,
-      validate(value) {
-        if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
-          throw new Error('Password must contain at least one letter and one number');
-        }
-      },
+      // validate(value) {
+      //   if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
+      //     throw new Error('Password must contain at least one letter and one number');
+      //   }
+      // },
       private: true, // used by the toJSON plugin
     },
     role: {

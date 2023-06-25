@@ -9,6 +9,13 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<User>}
  */
 const createUser = async (userBody) => {
+  console.log('userBody', userBody);
+  if (userBody.role == 'recycler' && (!userBody.threshold ||
+    !userBody.company ||
+    !userBody.category ||
+    !userBody.preference)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Recycler details is required');
+  }
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }

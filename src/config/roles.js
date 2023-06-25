@@ -1,5 +1,6 @@
 const allRoles = {
   user: [],
+  recycler: [],
   admin: ['getUsers', 'manageUsers', 'manageListings'],
 };
 
