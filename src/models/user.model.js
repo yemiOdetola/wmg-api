@@ -11,6 +11,12 @@ const userSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     email: {
       type: String,
       required: true,
@@ -29,20 +35,25 @@ const userSchema = mongoose.Schema(
       trim: true,
     },
     company: {
-      type: Number,
+      type: String,
       required: false,
       trim: true,
     },
-    category: {
-      type: Number,
+    category: [{
+      type: String,
       required: false,
       trim: true,
-    },
+    }],
     preference: [{
       type: String,
       required: false,
       trim: true,
     }],
+    distance: {
+      type: Number,
+      required: false,
+      trim: true,
+    },
     avatar: {
       type: String,
       required: true,

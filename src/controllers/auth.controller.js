@@ -4,15 +4,15 @@ const { authService, userService, tokenService, emailService } = require('../ser
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
-  const tokens = await tokenService.generateAuthTokens(user);
-  res.status(httpStatus.CREATED).send({ user, tokens });
+  const token = await tokenService.generateAuthTokens(user);
+  res.status(httpStatus.CREATED).send({ user, token });
 });
 
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.loginUserWithEmailAndPassword(email, password);
-  const tokens = await tokenService.generateAuthTokens(user);
-  res.send({ user, tokens });
+  const token = await tokenService.generateAuthTokens(user);
+  res.send({ user, token });
 });
 
 const logout = catchAsync(async (req, res) => {

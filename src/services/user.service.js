@@ -9,7 +9,6 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<User>}
  */
 const createUser = async (userBody) => {
-  console.log('userBody', userBody);
   if (userBody.role == 'recycler' && (!userBody.threshold ||
     !userBody.company ||
     !userBody.category ||
