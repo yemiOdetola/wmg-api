@@ -2,6 +2,31 @@ const nodemailer = require('nodemailer');
 const config = require('../config/config');
 const logger = require('../config/logger');
 
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'yemiotola@gmail.com',
+    pass: 'ibfxfvsrcwrpsazd'
+  }
+});
+
+const mailOptions = {
+  from: 'noreply@wmg.test',
+  to: 'yemiotola@outlook.com',
+  subject: 'Email Subject',
+  text: 'Email Body'
+};
+
+const mailTest = () => {
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+};
+
 const transport = nodemailer.createTransport(config.email.smtp);
 /* istanbul ignore next */
 if (config.env !== 'test') {
@@ -60,4 +85,5 @@ module.exports = {
   sendEmail,
   sendResetPasswordEmail,
   sendVerificationEmail,
+  mailTest,
 };

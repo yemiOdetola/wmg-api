@@ -42,6 +42,13 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const testEmail = catchAsync(async (req, res) => {
+  const subject = 'testing email 123'
+  const text = 'email body 1234';
+  await emailService.sendEmail(req.body.to, subject, text);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
 const verifyEmail = catchAsync(async (req, res) => {
   await authService.verifyEmail(req.query.token);
   res.status(httpStatus.NO_CONTENT).send();
@@ -56,4 +63,5 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   verifyEmail,
+  testEmail,
 };
