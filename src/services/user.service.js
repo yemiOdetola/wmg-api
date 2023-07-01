@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
 
-// https://avatars.dicebear.com/api/avataaars/1828888885.svg
+
 /**
  * Create a user
  * @param {Object} userBody

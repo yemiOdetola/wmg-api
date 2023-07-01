@@ -11,7 +11,7 @@ const router = express.Router();
 router
   .route('/')
   .get(listingController.getListings)
-  .post(auth('manageListings'), validate(listingValidation.createListing), listingController.createListing)
+  .post(validate(listingValidation.createListing), listingController.createListing)
 
 router
   .route('/nearby')
