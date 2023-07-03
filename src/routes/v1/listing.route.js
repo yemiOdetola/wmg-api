@@ -13,9 +13,14 @@ router
   .get(listingController.getListings)
   .post(validate(listingValidation.createListing), listingController.createListing)
 
+
 router
   .route('/nearby')
   .post(validate(listingValidation.getSpatialListings), listingController.getRadiiListing)
+
+router
+  .route('/ahp')
+  .get(listingController.getListingsAhp)
 
 router
   .route('/:listingId')
