@@ -5,6 +5,25 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { listingService } = require('../services');
 
+const recycler = {
+  _id: "64999ae16e2c8fd88e3ef51d",
+  name: "Test recycler",
+  phone: "08119775439",
+  email: "rectest@gmail.com",
+  threshold: 120,
+  company: "Testing company",
+  category: ["textitle", "paper", "generic"],
+  preference: ["Distance", "Price", "Quantity"],
+  distance: 90,
+  location: [3.3576195873320103, 6.533973328041524],
+  avatar: "https://avatars.dicebear.com/api/avataaars/923.svg",
+  password: "$2a$08$H0h1nSAaaYoEaMlhYXPQReFRLw9G8kfkUzEPB.lBAW6OSWcPRO7h2",
+  role: "recycler",
+  isEmailVerified: false,
+  createdAt: "2023-06-26T14:04:17.536+00:00",
+  updatedAt: "2023-06-26T14:04:17.536+00:00",
+}
+
 const createListing = catchAsync(async (req, res) => {
   const listing = await listingService.createListing(req.body);
   res.status(httpStatus.CREATED).send(listing);
@@ -31,65 +50,134 @@ const getListing = catchAsync(async (req, res) => {
   res.send(listing);
 });
 
-const getListingsAhp = catchAsync(async (req, res) => {
-  const ahpContext = new AHP();
-  const items = ['Item1', 'Item2', 'Item3', 'Item4', 'Item5', 'Item6', 'Item7', 'Item8', 'Item9', 'Item10'];
-  const criteria = ['Criterion1', 'Criterion2', 'Criterion3'];
-  const criteriaItemRank = {
-    Criterion1: [
-      [1, 3, 5, 1, 5, 7, 3, 2, 5, 2],
-      [1 / 3, 1, 4, 1 / 6, 3, 5, 1, 1 / 2, 4, 1 / 2],
-      [1 / 5, 1 / 4, 1, 1 / 5, 2, 3, 1 / 3, 1 / 3, 1, 1 / 2],
-      [1, 6, 5, 1, 6, 8, 4, 3, 6, 3],
-      [1 / 5, 1 / 3, 1 / 2, 1 / 6, 1, 3, 1 / 2, 1 / 3, 3 / 2, 1 / 2],
-      [1 / 7, 1 / 5, 1 / 3, 1 / 8, 1 / 3, 1, 1 / 4, 1 / 5, 1, 1 / 3],
-      [1 / 3, 1, 3, 1 / 4, 2, 4, 1, 1 / 2, 3, 1 / 2],
-      [1 / 2, 2, 3, 1 / 3, 3, 5, 2, 1, 4, 1],
-      [1 / 5, 1 / 4, 1, 1 / 6, 2 / 3, 1, 1 / 3, 1 / 4, 1, 1 / 3],
-      [1 / 2, 2, 2, 1 / 3, 2, 3, 2, 1, 3, 1]
-    ],
-    Criterion2: [
-      [1, 2, 1 / 3, 5, 3, 1, 1 / 2, 1 / 3, 1, 2],
-      [1 / 2, 1, 1 / 5, 3, 2, 1 / 2, 1 / 4, 1 / 5, 1 / 2, 1],
-      [3, 5, 1, 7, 5, 2, 3, 1, 3, 5],
-      [1 / 5, 1 / 3, 1 / 7, 1, 1 / 2, 1 / 5, 1 / 7, 1 / 9, 1 / 4, 1 / 3],
-      [1 / 3, 1 / 2, 1 / 5, 2, 1, 1 / 3, 1 / 5, 1 / 7, 1 / 2, 1 / 2],
-      [1, 2, 1 / 2, 5, 3, 1, 1 / 3, 1 / 2, 1, 2],
-      [2, 4, 1 / 3, 7, 5, 3, 1, 1 / 3, 3 / 2, 2],
-      [3, 5, 1, 9, 7, 2, 3, 1, 3, 5],
-      [1, 2, 1 / 3, 4, 2, 1, 2 / 3, 1 / 3, 1, 2],
-      [1 / 2, 1, 1 / 5, 3, 2, 1 / 2, 1 / 2, 1 / 5, 1 / 2, 1]
-    ],
-    Criterion3: [
-      [1, 5, 2, 1 / 3, 1 / 5, 2, 1 / 2, 1 / 3, 1, 1],
-      [1 / 5, 1, 1 / 3, 1 / 7, 1 / 9, 1 / 3, 1 / 5, 1 / 7, 1 / 4, 1 / 3],
-      [1 / 2, 3, 1, 1 / 5, 1 / 3, 3 / 2, 1, 1 / 3, 2, 2],
-      [3, 7, 5, 1, 1 / 3, 4, 1, 1 / 3, 2, 3],
-      [5, 9, 3, 3, 1, 5, 3, 1, 4, 4],
-      [1 / 2, 3, 2 / 3, 1 / 4, 1 / 5, 1, 1 / 3, 1 / 5, 2 / 3, 1],
-      [2, 5, 1, 1, 1 / 3, 3, 1, 1 / 3, 2, 2],
-      [3, 7, 3, 3, 1, 5, 3, 1, 3, 3],
-      [1, 4, 1 / 2, 1 / 2, 1 / 4, 3 / 2, 1 / 2, 1 / 3, 1, 1],
-      [1, 3, 1 / 2, 1 / 3, 1 / 4, 1, 1 / 2, 1 / 3, 1, 1]
-    ]
-  };
-  const criteriaRank = [
-    [1, 3, 5],
-    [1 / 3, 1, 3],
-    [1 / 5, 1 / 3, 1]
-  ];
+const toRadians = (degrees) => {
+  return degrees * (Math.PI / 180);
+}
 
+// source: https://cloud.google.com/blog/products/maps-platform/how-calculate-distances-map-maps-javascript-api
+const haversineDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371.0710; // Radius of the Earth(km)
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  const distance = R * c;
+  return distance;
+}
+
+const createDistanceMatrix = (items) => {
+  const distanceMatrix = [];
+  const recyclerLocation = { coordinates: [recycler.location[0], recycler.location[1]] };
+  for (let i = 0; i < items.length; i++) {
+    const itemLocation = items[i].location;
+    const distance = haversineDistance(
+      recyclerLocation.coordinates[1], recyclerLocation.coordinates[0],
+      itemLocation[1], itemLocation[0]
+    );
+    distanceMatrix.push(distance);
+  }
+  // console.log(distanceMatrix);
+  return distanceMatrix;
+}
+
+const createPriceMatrix = (extractedFields) => {
+  const priceMatrix = [];
+  for (let i = 0; i < extractedFields.length; i++) {
+    const row = [];
+    for (let j = 0; j < extractedFields.length; j++) {
+      if (i === j) {
+        row.push(1);
+      } else {
+        const ratio = extractedFields[i].price / extractedFields[j].price;
+        row.push(ratio);
+      }
+    }
+    priceMatrix.push(row);
+  }
+  // console.log(priceMatrix);
+  return priceMatrix;
+}
+
+const createQuantityMatrix = (extractedFields) => {
+  const quantityMatrix = [];
+  for (let i = 0; i < extractedFields.length; i++) {
+    const row = [];
+    for (let j = 0; j < extractedFields.length; j++) {
+      if (i === j) {
+        row.push(1);
+      } else {
+        const ratio = extractedFields[i].weight / extractedFields[j].weight;
+        row.push(ratio);
+      }
+    }
+    quantityMatrix.push(row);
+  }
+  // console.log(quantityMatrix);
+  return quantityMatrix;
+}
+
+const createCriteriaRank = (criterion) => {
+  let criteriaMatrix = [];
+  for (let i = 0; i < criterion.length; i++) {
+    const row = [];
+    for (let j = 0; j < criterion.length; j++) {
+      if (i === j) {
+        row.push(1); // Diagonal elements
+      } else {
+        const value = criterion[i] / criterion[j];
+        row.push(value);
+      }
+    }
+    criteriaMatrix.push(row);
+  }
+  return criteriaMatrix;
+}
+
+const getListingsRank = catchAsync(async (req, res) => {
+  let results = [];
+  const ahpContext = new AHP();
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  results = await listingService.queryListings(null, options);
+  let extractedFields = [];
+  results.results.map((result) => {
+    extractedFields.push({
+      id: result._id,
+      location: result.location.coordinates,
+      weight: result.weight,
+      price: result.price,
+      category: result.category,
+      status: result.status,
+    })
+  });
+  const criteria = ['quantity', 'distance', 'price'];
+  const criteriaRank = await createCriteriaRank([7, 5, 3]);
+  const distanceMatrix = await createDistanceMatrix(extractedFields);
+  const priceMatrix = await createPriceMatrix(extractedFields);
+  const qtyMatrix = await createQuantityMatrix(extractedFields);
+  const criteriaItemRank = {
+    'quantity': [...qtyMatrix],
+    'distance': [...distanceMatrix],
+    'price': [...priceMatrix],
+  }
   ahpContext.import({
-    items,
-    criteria,
-    criteriaItemRank,
-    criteriaRank
+    items: extractedFields,
+    criteria: criteria,
+    criteriaItemRank: criteriaItemRank,
+    criteriaRank: criteriaRank
   });
 
   const output = ahpContext.run();
-  const rankedItems = output.rankedScores.map((score, index) => ({ item: items[index], score }));
-  console.log(rankedItems);
-  // console.log(output);
+  const rankedItems = output.rankedScores.map((score, index) => ({ item: extractedFields[index], score }));
+  rankedItems.sort( (a,b) => b.score - a.score );
+  res.send(rankedItems);
+  // console.log(qtyMatrix.map(row => row.join(', ')))
+  // res.send(distanceMatrix.join(','));
 });
 
 const updateListing = catchAsync(async (req, res) => {
@@ -109,5 +197,5 @@ module.exports = {
   getListing,
   updateListing,
   deleteListing,
-  getListingsAhp,
+  getListingsRank,
 };

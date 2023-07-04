@@ -3,7 +3,7 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
 
-const categories = ['generic', 'paper', 'glass', 'textitle', 'furniture', 'e-waste', 'batteries', 'plastic'];
+const categories = ['generic', 'paper', 'glass', 'textile', 'furniture', 'e-waste', 'batteries', 'plastic', 'metal'];
 const statusEnum = ['available', 'accepted', 'rejected', 'counter', 'completed'];
 
 const listingSchema = mongoose.Schema(

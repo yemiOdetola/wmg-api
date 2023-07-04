@@ -20,7 +20,7 @@ router
 
 router
   .route('/ahp')
-  .get(listingController.getListingsAhp)
+  .get(listingController.getListingsRank)
 
 router
   .route('/:listingId')

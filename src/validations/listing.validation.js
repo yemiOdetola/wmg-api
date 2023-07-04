@@ -12,7 +12,7 @@ const createListing = {
     price: Joi.number().required(),
     user: Joi.string().custom(objectId),
     location: Joi.any(),
-    category: Joi.string().required().valid('generic', 'paper', 'glass', 'textitle', 'furniture', 'e-waste', 'batteries', 'plastic'),
+    category: Joi.string().required().valid('generic', 'paper', 'glass', 'textile', 'furniture', 'e-waste', 'batteries', 'plastic', 'metal'),
   }),
 };
 
