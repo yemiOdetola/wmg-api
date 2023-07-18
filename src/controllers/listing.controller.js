@@ -55,7 +55,10 @@ const toRadians = (degrees) => {
 }
 
 // source: https://cloud.google.com/blog/products/maps-platform/how-calculate-distances-map-maps-javascript-api
-const haversineDistance = (lat1, lon1, lat2, lon2) => {
+const haversineDistance = (coord1, coord2) => {
+  // console.log(coord1, coord2);
+  const [lat1, lon1] = coord1;
+  const [lat2, lon2] = coord2;
   const R = 6371.0710; // Radius of the Earth(km)
   const dLat = toRadians(lat2 - lat1);
   const dLon = toRadians(lon2 - lon1);
@@ -71,18 +74,27 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
   return distance;
 }
 
+// const createDistanceMatrix = (items) => {
+//   // const distanceMatrix = [];
+//   const distanceMatrix = new Array(10).fill(0).map(() => new Array(10).fill(0));
+//   const recyclerLocation = { coordinates: [recycler.location[0], recycler.location[1]] };
+//   for (let i = 0; i < 10; i++) {
+//     for (let j = 0; j < 10; j++) {
+//       const distance = haversineDistance(recyclerLocation.coordinates, items[i].location) -
+//         haversineDistance(recyclerLocation.coordinates, items[j].location);
+//       distanceMatrix[i][j] = distance;
+//     }
+//   }
+//   return distanceMatrix;
+// }
+
 const createDistanceMatrix = (items) => {
   const distanceMatrix = [];
   const recyclerLocation = { coordinates: [recycler.location[0], recycler.location[1]] };
   for (let i = 0; i < items.length; i++) {
-    const itemLocation = items[i].location;
-    const distance = haversineDistance(
-      recyclerLocation.coordinates[1], recyclerLocation.coordinates[0],
-      itemLocation[1], itemLocation[0]
-    );
+    const distance = haversineDistance(recyclerLocation.coordinates, items[i].location);
     distanceMatrix.push(distance);
   }
-  // console.log(distanceMatrix);
   return distanceMatrix;
 }
 
@@ -136,6 +148,7 @@ const createCriteriaRank = (criterion) => {
     }
     criteriaMatrix.push(row);
   }
+  // console.log('criteriaMatrix: ', criteriaMatrix);
   return criteriaMatrix;
 }
 
@@ -155,29 +168,35 @@ const getListingsRank = catchAsync(async (req, res) => {
       status: result.status,
     })
   });
-  const criteria = ['quantity', 'distance', 'price'];
-  const criteriaRank = await createCriteriaRank([7, 5, 3]);
+  // const criteria = ['quantity', 'distance', 'price'];
+  // const criteriaRank = await createCriteriaRank([7, 5, 3]);
+  const criteriaRank = [9, 5, 3];
   const distanceMatrix = await createDistanceMatrix(extractedFields);
   const priceMatrix = await createPriceMatrix(extractedFields);
   const qtyMatrix = await createQuantityMatrix(extractedFields);
   const criteriaItemRank = {
-    'quantity': [...qtyMatrix],
-    'distance': [...distanceMatrix],
-    'price': [...priceMatrix],
+    'quantity': qtyMatrix,
+    'distance': distanceMatrix,
+    'price': priceMatrix,
   }
+
   ahpContext.import({
     items: extractedFields,
-    criteria: criteria,
+    criteria: ['quantity', 'distance', 'price'],
     criteriaItemRank: criteriaItemRank,
     criteriaRank: criteriaRank
   });
 
-  const output = ahpContext.run();
-  const rankedItems = output.rankedScores.map((score, index) => ({ item: extractedFields[index], score }));
-  rankedItems.sort( (a,b) => b.score - a.score );
-  res.send(rankedItems);
-  // console.log(qtyMatrix.map(row => row.join(', ')))
-  // res.send(distanceMatrix.join(','));
+  // const output = ahpContext.run();
+  // const rankedItems = output.rankedScores.map((score, index) => ({ item: extractedFields[index], score }));
+  // rankedItems.sort((a, b) => b.score - a.score);
+  setTimeout(() => {
+    const analyticContext = ahpContext.debug();
+    for (const key in analyticContext) {
+      console.log(`${key}: `, analyticContext[key], '\n');
+    }
+    res.send(analyticContext);
+  }, 3000)
 });
 
 const updateListing = catchAsync(async (req, res) => {
