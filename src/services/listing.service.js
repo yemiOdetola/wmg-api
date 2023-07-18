@@ -25,6 +25,11 @@ const queryListings = async (filter, options) => {
   return listings;
 };
 
+const queryListingByUser = async (user, options) => {
+  const listings = await Listing.find({ user: user.userId })
+  return listings;
+};
+
 /**
  * Get listing by id
  * @param {ObjectId} id
@@ -122,6 +127,7 @@ const deleteListingById = async (listingId) => {
 module.exports = {
   createListing,
   queryListings,
+  queryListingByUser,
   getListingById,
   getSpatialListings,
   updateListingById,

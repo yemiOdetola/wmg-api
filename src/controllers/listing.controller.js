@@ -36,6 +36,12 @@ const getListings = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const getListingByUser = catchAsync(async (req, res) => {
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const result = await listingService.queryListingByUser(req.body, options);
+  res.send(result);
+});
+
 const getRadiiListing = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await listingService.getSpatialListings(req.body.location, options);
@@ -212,6 +218,7 @@ const deleteListing = catchAsync(async (req, res) => {
 module.exports = {
   createListing,
   getListings,
+  getListingByUser,
   getRadiiListing,
   getListing,
   updateListing,

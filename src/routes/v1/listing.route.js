@@ -13,6 +13,10 @@ router
   .get(listingController.getListings)
   .post(validate(listingValidation.createListing), listingController.createListing)
 
+router
+  .route('/my-listing')
+  .post(listingController.getListingByUser)
+
 
 router
   .route('/nearby')
