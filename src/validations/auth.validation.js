@@ -11,6 +11,7 @@ const register = {
     category: Joi.array().items(Joi.string()),
     preference: Joi.array().items(Joi.string()),
     distance: Joi.number(),
+    location: Joi.any(),
     avatar: Joi.string(),
     role: Joi.string().required(),
     password: Joi.string().required().custom(password),

@@ -36,6 +36,11 @@ const queryUsers = async (filter, options) => {
   return users;
 };
 
+const fetchRecyclers = async () => {
+  const recyclers = await User.find({ role: 'recycler' });
+  return recyclers;
+};
+
 /**
  * Get user by id
  * @param {ObjectId} id
@@ -90,6 +95,7 @@ const deleteUserById = async (userId) => {
 module.exports = {
   createUser,
   queryUsers,
+  fetchRecyclers,
   getUserById,
   getUserByEmail,
   updateUserById,

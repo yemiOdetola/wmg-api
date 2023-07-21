@@ -3,7 +3,7 @@ const AHP = require('ahp');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
-const { listingService } = require('../services');
+const { listingService, userService } = require('../services');
 
 const recycler = {
   _id: "64999ae16e2c8fd88e3ef51d",
@@ -24,9 +24,90 @@ const recycler = {
   updatedAt: "2023-06-26T14:04:17.536+00:00",
 }
 
+const degToRad = (degrees) => {
+  return degrees * (Math.PI / 180);
+}
+
+// source: https://cloud.google.com/blog/products/maps-platform/how-calculate-distances-map-maps-javascript-api
+const haversineDistance = (coord1, coord2) => {
+  // console.log(coord1, coord2);
+  const [lat1, lon1] = coord1;
+  const [lat2, lon2] = coord2;
+  const R = 6371.0710; // Radius of the Earth(km)
+  const dLat = degToRad(lat2 - lat1);
+  const dLon = degToRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  const distance = R * c;
+  return distance;
+}
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const earthRadius = 6371; // Earth's radius in kilometers
+  const dLat = degToRad(lat2 - lat1);
+  const dLon = degToRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = earthRadius * c;
+  return distance;
+}
+
+function filterRecyclersWithinRadius(household, recyclers) {
+  const filteredRecyclers = recyclers.filter(recycler => {
+    const distance = calculateDistance(
+      household[0], household[1],
+      recycler.location.coord.lat, recycler.location.coord.lng
+    );
+    return distance <= recycler.distance;
+  });
+  return filteredRecyclers;
+}
+
+
+function findClosestRecycler(household, recyclers) {
+  let closestRecycler = null;
+  let minDistance = Number.MAX_VALUE;
+  recyclers.forEach(recycler => {
+    const distance = calculateDistance(
+      household[0], household[1],
+      recycler.location.coord.lat, recycler.location.coord.lng
+    );
+    if (distance < minDistance) {
+      closestRecycler = recycler;
+      minDistance = distance;
+    }
+  });
+  return closestRecycler;
+}
+
+
 const createListing = catchAsync(async (req, res) => {
   const listing = await listingService.createListing(req.body);
-  res.status(httpStatus.CREATED).send(listing);
+  const recyclers = await userService.fetchRecyclers();
+  const householdLocation = req.body.location.coordinates;
+  const filteredRecyclers = await filterRecyclersWithinRadius(householdLocation, recyclers);
+  const pushedRecyclers = [];
+  if (filteredRecyclers.length > 0) {
+    filteredRecyclers.map(rec => pushedRecyclers.push(rec._id));
+  } else {
+    const closestRecycler = await findClosestRecycler(householdLocation, recyclers);
+    pushedRecyclers.push(closestRecycler._id);
+  }
+  const payload = {
+    recyclers: pushedRecyclers
+  }
+  console.log('sending up now', payload);
+  const updatedListing = await listingService.updateListingById(listing._id, payload);
+  res.status(httpStatus.CREATED).send(updatedListing);
 });
 
 const getListings = catchAsync(async (req, res) => {
@@ -55,30 +136,6 @@ const getListing = catchAsync(async (req, res) => {
   }
   res.send(listing);
 });
-
-const toRadians = (degrees) => {
-  return degrees * (Math.PI / 180);
-}
-
-// source: https://cloud.google.com/blog/products/maps-platform/how-calculate-distances-map-maps-javascript-api
-const haversineDistance = (coord1, coord2) => {
-  // console.log(coord1, coord2);
-  const [lat1, lon1] = coord1;
-  const [lat2, lon2] = coord2;
-  const R = 6371.0710; // Radius of the Earth(km)
-  const dLat = toRadians(lat2 - lat1);
-  const dLon = toRadians(lon2 - lon1);
-
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  const distance = R * c;
-  return distance;
-}
 
 // const createDistanceMatrix = (items) => {
 //   // const distanceMatrix = [];
@@ -206,7 +263,7 @@ const getListingsRank = catchAsync(async (req, res) => {
 });
 
 const updateListing = catchAsync(async (req, res) => {
-  const listing = await listingService.updateListingById(req.params.listingId, req.body);
+  const listing = await listingService.updateListingById(req.body.listingId, req.body);
   res.send(listing);
 });
 

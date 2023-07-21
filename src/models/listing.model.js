@@ -57,10 +57,10 @@ const listingSchema = mongoose.Schema(
       enum: statusEnum,
       default: 'available'
     },
-    // recycler: {
-    //   type: mongoose.SchemaTypes.ObjectId,
-    //   ref: 'Recycler'
-    // },
+    recyclers: [{
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'Recycler'
+    }],
     counterOffer: {
       type: Number
     },

@@ -54,6 +54,7 @@ const userSchema = mongoose.Schema(
       required: false,
       trim: true,
     },
+    location: {},
     avatar: {
       type: String,
       required: true,
