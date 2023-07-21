@@ -105,13 +105,11 @@ const createListing = catchAsync(async (req, res) => {
   const payload = {
     recyclers: pushedRecyclers
   }
-  console.log('sending up now', payload);
   const updatedListing = await listingService.updateListingById(listing._id, payload);
   res.status(httpStatus.CREATED).send(updatedListing);
 });
 
 const getListings = catchAsync(async (req, res) => {
-  // const filter = pick(req.query, ['name', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await listingService.queryListings(null, options);
   res.send(result);
