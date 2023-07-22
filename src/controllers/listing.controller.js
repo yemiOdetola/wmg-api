@@ -127,7 +127,6 @@ const getRecyclerListings = async (req) => {
   return pickups;
 }
 
-// recId => getListings => accumulate weight
 const checkThreshold = async (recyclersWithThreshold) => {
   recyclersWithThreshold.map(async (rec) => {
     const recy = await listingService.getListingsByRecycler(rec.id);
@@ -138,7 +137,6 @@ const checkThreshold = async (recyclersWithThreshold) => {
 const recyclerListings = (listings) => {
   let total = 0;
   listings.filter(list => total += list.weight);
-  console.log('THRESSSSHEHEHEHEHE', total);
 }
 
 const getListings = catchAsync(async (req, res) => {
