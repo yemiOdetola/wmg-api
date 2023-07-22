@@ -39,6 +39,10 @@ const getListingById = async (id) => {
   return Listing.findById(id);
 };
 
+const getListingsByRecycler = async (recyclerId) => {
+  const listings = await Listing.find({ recyclers: recyclerId });
+  return listings;
+}
 /**
  * Get listing by id
  * @param {Location} location
@@ -128,6 +132,7 @@ module.exports = {
   createListing,
   queryListings,
   queryListingByUser,
+  getListingsByRecycler,
   getListingById,
   getSpatialListings,
   updateListingById,

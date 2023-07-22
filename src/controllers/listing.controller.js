@@ -96,18 +96,50 @@ const createListing = catchAsync(async (req, res) => {
   const householdLocation = req.body.location.coordinates;
   const filteredRecyclers = await filterRecyclersWithinRadius(householdLocation, recyclers);
   const pushedRecyclers = [];
+  const recyclersWithThreshold = [];
   if (filteredRecyclers.length > 0) {
-    filteredRecyclers.map(rec => pushedRecyclers.push(rec._id));
+    filteredRecyclers.map(rec => {
+      pushedRecyclers.push(rec._id);
+      recyclersWithThreshold.push({
+        id: rec._id,
+        threshold: rec.threshold,
+      });
+    });
   } else {
     const closestRecycler = await findClosestRecycler(householdLocation, recyclers);
     pushedRecyclers.push(closestRecycler._id);
+    recyclersWithThreshold.push({
+      id: closestRecycler._id,
+      threshold: closestRecycler.threshold,
+    });
   }
   const payload = {
     recyclers: pushedRecyclers
   }
   const updatedListing = await listingService.updateListingById(listing._id, payload);
+  checkThreshold(recyclersWithThreshold);
   res.status(httpStatus.CREATED).send(updatedListing);
 });
+
+
+const getRecyclerListings = async (req) => {
+  const pickups = await listingService.getListingsByRecycler(req.body.recyclerId);
+  return pickups;
+}
+
+// recId => getListings => accumulate weight
+const checkThreshold = async (recyclersWithThreshold) => {
+  recyclersWithThreshold.map(async (rec) => {
+    const recy = await listingService.getListingsByRecycler(rec.id);
+    recyclerListings(recy, recyclersWithThreshold);
+  });
+}
+
+const recyclerListings = (listings) => {
+  let total = 0;
+  listings.filter(list => total += list.weight);
+  console.log('THRESSSSHEHEHEHEHE', total);
+}
 
 const getListings = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -274,6 +306,7 @@ module.exports = {
   createListing,
   getListings,
   getListingByUser,
+  getRecyclerListings,
   getRadiiListing,
   getListing,
   updateListing,

@@ -17,6 +17,7 @@ router
   .route('/my-listing')
   .post(listingController.getListingByUser)
 
+router.post('/recycler-listings', listingController.getRecyclerListings)
 
 router
   .route('/nearby')
