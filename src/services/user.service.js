@@ -18,7 +18,7 @@ const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
-  if (!userBody.avatar) userBody.avatar = `https://avatars.dicebear.com/api/avataaars/0000.svg`;
+  if (!userBody.avatar) userBody.avatar = `https://avatars.dicebear.com/api/avataaars/0000.png`;
   return User.create(userBody);
 };
 

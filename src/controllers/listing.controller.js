@@ -3,7 +3,7 @@ const AHP = require('ahp');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
-const { listingService, userService } = require('../services');
+const { listingService, userService, emailService } = require('../services');
 
 const recycler = {
   _id: "64999ae16e2c8fd88e3ef51d",
@@ -16,7 +16,7 @@ const recycler = {
   preference: ["Distance", "Price", "Quantity"],
   distance: 90,
   location: [3.3576195873320103, 6.533973328041524],
-  avatar: "https://avatars.dicebear.com/api/avataaars/923.svg",
+  avatar: "https://avatars.dicebear.com/api/avataaars/923.png",
   password: "$2a$08$H0h1nSAaaYoEaMlhYXPQReFRLw9G8kfkUzEPB.lBAW6OSWcPRO7h2",
   role: "recycler",
   isEmailVerified: false,
@@ -72,7 +72,6 @@ function filterRecyclersWithinRadius(household, recyclers) {
   return filteredRecyclers;
 }
 
-
 function findClosestRecycler(household, recyclers) {
   let closestRecycler = null;
   let minDistance = Number.MAX_VALUE;
@@ -89,7 +88,6 @@ function findClosestRecycler(household, recyclers) {
   return closestRecycler;
 }
 
-
 const createListing = catchAsync(async (req, res) => {
   const listing = await listingService.createListing(req.body);
   const recyclers = await userService.fetchRecyclers();
@@ -100,18 +98,12 @@ const createListing = catchAsync(async (req, res) => {
   if (filteredRecyclers.length > 0) {
     filteredRecyclers.map(rec => {
       pushedRecyclers.push(rec._id);
-      recyclersWithThreshold.push({
-        id: rec._id,
-        threshold: rec.threshold,
-      });
+      recyclersWithThreshold.push(rec);
     });
   } else {
     const closestRecycler = await findClosestRecycler(householdLocation, recyclers);
     pushedRecyclers.push(closestRecycler._id);
-    recyclersWithThreshold.push({
-      id: closestRecycler._id,
-      threshold: closestRecycler.threshold,
-    });
+    recyclersWithThreshold.push(closestRecycler);
   }
   const payload = {
     recyclers: pushedRecyclers
@@ -121,7 +113,6 @@ const createListing = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send(updatedListing);
 });
 
-
 const getRecyclerListings = async (req) => {
   const pickups = await listingService.getListingsByRecycler(req.body.recyclerId);
   return pickups;
@@ -129,14 +120,28 @@ const getRecyclerListings = async (req) => {
 
 const checkThreshold = async (recyclersWithThreshold) => {
   recyclersWithThreshold.map(async (rec) => {
-    const recy = await listingService.getListingsByRecycler(rec.id);
-    recyclerListings(recy, recyclersWithThreshold);
+    const recListings = await listingService.getListingsByRecycler(rec._id);
+    recyclerListings(recListings, rec);
   });
 }
 
-const recyclerListings = (listings) => {
+//do; for each recycler
+const recyclerListings = async (listings, rec) => {
   let total = 0;
-  listings.filter(list => total += list.weight);
+  await listings.filter(list => total += list.weight);
+  if (total >= rec.threshold) {
+    sendRecyclerThresholdEmail(total, rec)
+  }
+}
+
+const sendRecyclerThresholdEmail = async (total, rec) => {
+  const subject = 'Recycling Threshold Reached';
+  const text = `Dear ${rec.name},\n\nYour recycling threshold of ${rec.threshold} kg has been reached. 
+  \n There is ${total} kg of recyclable materials available now!
+  \n Hurry, It's time to schedule a pickup!
+  \n\n Best regards,\nYour friends from testing_WMG`;
+  const from = 'testingwmg@gmail.com'
+  await emailService.sendEmail(from, rec.email, subject, text);
 }
 
 const getListings = catchAsync(async (req, res) => {
@@ -259,8 +264,9 @@ const getListingsRank = catchAsync(async (req, res) => {
       status: result.status,
     })
   });
-  // const criteria = ['quantity', 'distance', 'price'];
-  // const criteriaRank = await createCriteriaRank([7, 5, 3]);
+  // const criteria = ['quantity', 'distance', 'price']; // recycler C
+  // const criteria = ['distance', 'price', 'quantity']; // recycler B
+  const criteria = ['price', 'quantity', 'distance']; // recycler A
   const criteriaRank = [9, 5, 3];
   const distanceMatrix = await createDistanceMatrix(extractedFields);
   const priceMatrix = await createPriceMatrix(extractedFields);
@@ -273,21 +279,29 @@ const getListingsRank = catchAsync(async (req, res) => {
 
   ahpContext.import({
     items: extractedFields,
-    criteria: ['quantity', 'distance', 'price'],
+    criteria: criteria,
     criteriaItemRank: criteriaItemRank,
     criteriaRank: criteriaRank
   });
 
-  // const output = ahpContext.run();
-  // const rankedItems = output.rankedScores.map((score, index) => ({ item: extractedFields[index], score }));
-  // rankedItems.sort((a, b) => b.score - a.score);
+  const output = ahpContext.run();
+  const rankedItems = output.rankedScores.map((score, index) => ({ item: extractedFields[index], score }));
+  rankedItems.sort((a, b) => b.score - a.score);
+  const rankedData = [];
+  rankedItems.map((rank) => {
+    results.results.map(el => {
+      if (el.id == rank.item.id) {
+        rankedData.push({ el, score: rank.score })
+      }
+    })
+  })
   setTimeout(() => {
     const analyticContext = ahpContext.debug();
     for (const key in analyticContext) {
       console.log(`${key}: `, analyticContext[key], '\n');
     }
-    res.send(analyticContext);
-  }, 3000)
+    res.send({ rankedItems, rankedData });
+  }, 1000)
 });
 
 const updateListing = catchAsync(async (req, res) => {
