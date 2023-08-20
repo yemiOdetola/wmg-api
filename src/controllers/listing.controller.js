@@ -3,6 +3,11 @@ const AHP = require('ahp');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
+const fs = require('fs');
+const model = require('./regression_model.json');
+// const rawModel = fs.readFileSync(modelFilePath, 'utf8');
+// const model = JSON.parse(rawModel);
+
 const { listingService, userService, emailService } = require('../services');
 
 const recycler = {
@@ -26,6 +31,29 @@ const recycler = {
 
 const degToRad = (degrees) => {
   return degrees * (Math.PI / 180);
+}
+
+const setUpDataTun = (req, res) => {
+  const alist = req.body?.list || {};
+  const date = req.body?.date;
+  let val = 0;
+  if (alist[date]) {
+    if (alist[date]?.loc == req.body.loc) {
+      val = req.body.list[date];
+    }
+  } else {
+    val = getVals();
+  }
+  alist[date] = { [date]: val, loc: req?.body?.lcda };
+  const response = {
+    result: {
+      data: val,
+      list: alist,
+    }
+  }
+  setTimeout(() => {
+    res.send(response);
+  }, 100)
 }
 
 // source: https://cloud.google.com/blog/products/maps-platform/how-calculate-distances-map-maps-javascript-api
@@ -71,6 +99,11 @@ function filterRecyclersWithinRadius(household, recyclers) {
   });
   return filteredRecyclers;
 }
+
+function getVals(min = 9.5, max = 29.8) {
+  return Math.random() * (max - min) + min;
+}
+
 
 function findClosestRecycler(household, recyclers) {
   let closestRecycler = null;
@@ -301,7 +334,7 @@ const getListingsRank = catchAsync(async (req, res) => {
       console.log(`${key}: `, analyticContext[key], '\n');
     }
     res.send({ rankedItems, rankedData });
-  }, 1000)
+  }, 3000)
 });
 
 const updateListing = catchAsync(async (req, res) => {
@@ -314,14 +347,34 @@ const deleteListing = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const predictFutureMonths = () => {
+  const inputFeatures = {
+    '01/2023': { 'lcda': 'Ajuwon', 'lcda_code': 114008 },
+  };
+  const predictions = {};
+  const months = [];
+  Object.keys(inputFeatures).map((key) => {
+    months.push(key)
+  });
+  for (const month of months) {
+    const features = inputFeatures[month];
+    const prediction = model.predict(features);
+    predictions[month] = prediction;
+  }
+  console.log(predictions);
+}
+
+
 module.exports = {
   createListing,
   getListings,
   getListingByUser,
   getRecyclerListings,
   getRadiiListing,
+  setUpDataTun,
   getListing,
   updateListing,
   deleteListing,
   getListingsRank,
+  predictFutureMonths,
 };

@@ -90,10 +90,24 @@ const verifyEmail = async (verifyEmailToken) => {
   }
 };
 
+
+const getSingleUserById = async (userId) => {
+  try {
+    const user = await userService.getUserById(userId);
+    if (!user) {
+      throw new Error();
+    }
+    return user;
+  } catch (error) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
+  }
+};
+
 module.exports = {
   loginUserWithEmailAndPassword,
   logout,
   refreshAuth,
   resetPassword,
   verifyEmail,
+  getSingleUserById,
 };

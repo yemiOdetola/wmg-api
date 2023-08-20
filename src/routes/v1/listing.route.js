@@ -18,6 +18,8 @@ router
   .post(listingController.getListingByUser)
 
 router.post('/recycler-listings', listingController.getRecyclerListings)
+router.get('/future-waste', listingController.predictFutureMonths)
+router.post('/new-waste', listingController.setUpDataTun)
 
 router
   .route('/nearby')
